@@ -11,6 +11,7 @@ export function TodoList() {
   const vm = useTodoListViewModel({
     addTodoUseCase: di.resolve('addTodoUseCase'),
     getTodosUseCase: di.resolve('getTodosUseCase'),
+    removeTodoUseCase: di.resolve('removeTodoUseCase'),
   });
 
   const { todos, loading, error, addTodo } = vm;
@@ -23,9 +24,7 @@ export function TodoList() {
           <p className='text-muted-foreground text-sm'>Verwalte deine Todos schnell und einfach</p>
         </div>
         {todos.length > 0 && (
-          <span className='text-muted-foreground text-xs rounded-md border px-2 py-0.5'>
-            {todos.length} offen
-          </span>
+          <span className='text-muted-foreground text-xs rounded-md border px-2 py-0.5'>{todos.length} offen</span>
         )}
       </header>
 

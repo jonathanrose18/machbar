@@ -32,5 +32,11 @@ export const makeLocalStorageTodoRepository = (): TodoRepository => {
     }
   };
 
-  return { add, get };
+  const remove = async (id: string): Promise<void> => {
+    const todos = await get();
+    const newTodos = todos.filter(todo => todo.id !== id);
+    localStorage.setItem(COLLECTION_NAME, JSON.stringify(newTodos));
+  };
+
+  return { add, get, remove };
 };
