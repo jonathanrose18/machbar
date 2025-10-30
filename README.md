@@ -17,7 +17,6 @@ Clean Architecture helps you:
 1. Domain (Enterprise Business Rules)
    - Pure business entities and value objects
    - No framework, no IO
-   - Stable, highly testable
 
 2. Application (Application Business Rules)
    - Use cases orchestrating domain logic
@@ -36,6 +35,59 @@ Clean Architecture helps you:
 5. DI/Composition Root
    - Wires implementations to ports
    - Provides an entry point for the UI to resolve use cases
+
+### Dependency Injection (DI): Wiring in the Container vs. Tight Coupling
+
+- Goal: Use cases depend on ports (abstractions), not on concrete technologies.
+- How: The DI container centrally wires which implementation fulfills which port.
+- Benefits: Swappable infrastructure, better testability, adherence to Dependency Inversion.
+
+Your container wiring:
+
+```ts
+import { createContainer, asFunction, Lifetime } from 'awilix';
+
+import { makeAddTodoUseCase } from '@/application/use-case/add-todo';
+import { makeGetTodosUseCase } from '@/application/use-case/get-todos';
+import { makeLocalStorageTodoRepository } from '@/adapters/persistence/localstorage/todo-repository';
+
+export const buildContainer = () => {
+  const container = createContainer({ injectionMode: 'PROXY' });
+  container.register({
+    addTodoUseCase: asFunction(makeAddTodoUseCase, { lifetime: Lifetime.SCOPED }),
+    getTodosUseCase: asFunction(makeGetTodosUseCase, { lifetime: Lifetime.SCOPED }),
+    todoRepository: asFunction(makeLocalStorageTodoRepository, { lifetime: Lifetime.SCOPED }),
+  });
+  return container;
+};
+```
+
+Anti-pattern (tight coupling inside the use case — avoid):
+
+```ts
+// Tight coupling: the use case creates the concrete implementation
+import { makeLocalStorageTodoRepository } from '@/adapters/persistence/localstorage/todo-repository';
+
+export const makeAddTodoUseCase = () => {
+  const repo = makeLocalStorageTodoRepository(); // technology decision inside the use case
+  return {
+    execute: ({ title }: { title: string }) => repo.add(title),
+  };
+};
+```
+
+#### Awilix: `injectionMode` and `lifetime`
+
+- injectionMode: `'PROXY'`
+  - Awilix uses proxies to lazily resolve dependencies upon property access.
+  - Advantages: less boilerplate, tolerant to resolution order, convenient for factory-style wiring.
+
+- lifetime: `Lifetime.SCOPED`
+  - One instance per scope (e.g., per container/request).
+  - In this app: a fresh instance for each built container, keeping use cases and adapters consistent within that scope.
+  - Alternatives:
+    - `Lifetime.SINGLETON`: one instance for the container’s lifetime.
+    - `Lifetime.TRANSIENT`: a new instance every time the dependency is resolved.
 
 ## Folder Structure
 
@@ -91,11 +143,11 @@ app/ (Next.js)            # Pages, layout, and global styles
 ## Data Flow (example: Add Todo)
 
 1. UI triggers the `addTodo` action from a view model
-2. View model calls `AddTodo` use case (Application)
-3. Use case validates and constructs `Todo` (Domain)
+2. View model executes `addTodoUseCase` use case (Application)
+3. Use case constructs `Todo` (Domain)
 4. Use case persists via `TodoRepository` port (Application)
 5. LocalStorage repository (Adapter) implements the port and writes to LocalStorage
-6. UI updates based on the updated list from `GetTodos` use case
+6. UI updates based on the updated list from `getTodosUseCase` use case
 
 This enforces that the use case knows only the port, not the storage technology.
 
@@ -118,6 +170,10 @@ npm run dev
 ```
 
 Open `http://localhost:3000` in your browser.
+
+## References
+
+- Heavily inspired by Robert C. Martin’s “The Clean Architecture” ([blog.cleancoder.com](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)).
 
 ---
 
