@@ -4,4 +4,5 @@ export interface TodoRepository {
   add(title: string): Promise<Todo>;
   get(): Promise<Todo[]>;
   remove(id: string): Promise<void>;
+  toggle(id: string): Promise<void>;
 }

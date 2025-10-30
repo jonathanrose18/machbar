@@ -16,9 +16,10 @@ export function TodoList() {
     addTodoUseCase: di.resolve('addTodoUseCase'),
     getTodosUseCase: di.resolve('getTodosUseCase'),
     removeTodoUseCase: di.resolve('removeTodoUseCase'),
+    toggleTodoUseCase: di.resolve('toggleTodoUseCase'),
   });
 
-  const { todos, loading, error, addTodo, removeTodo } = vm;
+  const { todos, loading, error, addTodo, removeTodo, toggleTodo } = vm;
 
   return (
     <section className='space-y-4'>
@@ -39,7 +40,7 @@ export function TodoList() {
       ) : (
         <ul className='divide-border rounded-md border'>
           {todos.map(todo => (
-            <TodoListItem key={todo.id} todo={todo} onRemove={removeTodo} />
+            <TodoListItem key={todo.id} todo={todo} onRemove={removeTodo} onToggle={toggleTodo} />
           ))}
         </ul>
       )}

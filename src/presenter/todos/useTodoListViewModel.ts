@@ -10,12 +10,14 @@ type Dependencies = {
   readonly addTodoUseCase: UseCaseWithParams<Todo, { title: string }>;
   readonly getTodosUseCase: UseCase<Todo[]>;
   readonly removeTodoUseCase: UseCaseWithParams<void, { id: string }>;
+  readonly toggleTodoUseCase: UseCaseWithParams<void, { id: string }>;
 };
 
 export function useTodoListViewModel({
   addTodoUseCase,
   getTodosUseCase,
   removeTodoUseCase,
+  toggleTodoUseCase,
   autoRefresh = true,
 }: Dependencies) {
   const [error, setError] = useState<string | null>(null);
@@ -70,6 +72,16 @@ export function useTodoListViewModel({
     [removeTodoUseCase, refresh]
   );
 
+  const toggleTodo = useCallback(
+    async (id: string) => {
+      setLoading(true);
+      setError(null);
+      await toggleTodoUseCase.execute({ id });
+      await refresh();
+    },
+    [toggleTodoUseCase, refresh]
+  );
+
   useEffect(() => {
     if (autoRefresh) {
       refresh();
@@ -82,6 +94,7 @@ export function useTodoListViewModel({
     loading,
     refresh,
     removeTodo,
+    toggleTodo,
     todos: sortedTodos,
   };
 }

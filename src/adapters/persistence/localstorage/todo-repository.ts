@@ -38,5 +38,11 @@ export const makeLocalStorageTodoRepository = (): TodoRepository => {
     localStorage.setItem(COLLECTION_NAME, JSON.stringify(newTodos));
   };
 
-  return { add, get, remove };
+  const toggle = async (id: string): Promise<void> => {
+    const todos = await get();
+    const newTodos = todos.map(todo => (todo.id === id ? { ...todo, done: !todo.done } : todo));
+    localStorage.setItem(COLLECTION_NAME, JSON.stringify(newTodos));
+  };
+
+  return { add, get, remove, toggle };
 };
