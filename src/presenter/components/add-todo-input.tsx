@@ -7,7 +7,10 @@ export function AddTodoInputGroup({ onAdd }: { onAdd: (title: string) => void })
 
   const submit = useCallback(() => {
     const trimmed = title.trim();
-    if (!trimmed) return;
+    if (!trimmed) {
+      return;
+    }
+
     onAdd(trimmed);
     setTitle('');
   }, [onAdd, title]);
@@ -27,14 +30,14 @@ export function AddTodoInputGroup({ onAdd }: { onAdd: (title: string) => void })
     <form onSubmit={handleSubmit} className='space-y-2'>
       <InputGroup>
         <InputGroupInput
-          placeholder='Neuen Task hinzufügen…'
-          aria-label='Neuen Task hinzufügen'
+          placeholder='Add new task...'
+          aria-label='Add new task'
           value={title}
           onChange={handleChange}
         />
         <InputGroupAddon align='inline-end'>
           <InputGroupButton type='submit' disabled={isDisabled} variant='secondary'>
-            Hinzufügen
+            Add
           </InputGroupButton>
         </InputGroupAddon>
       </InputGroup>
