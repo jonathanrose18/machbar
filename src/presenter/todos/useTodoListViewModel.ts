@@ -1,16 +1,17 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { Todo } from '@/domain/model/todo';
 import type { UseCase, UseCaseWithParams } from '@/domain/model/types';
 
 type Dependencies = {
+  readonly autoRefresh?: boolean;
   readonly addTodoUseCase: UseCaseWithParams<Todo, { title: string }>;
   readonly getTodosUseCase: UseCase<Todo[]>;
 };
 
-export function useTodoListViewModel({ addTodoUseCase, getTodosUseCase }: Dependencies) {
+export function useTodoListViewModel({ addTodoUseCase, getTodosUseCase, autoRefresh = true }: Dependencies) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -52,6 +53,12 @@ export function useTodoListViewModel({ addTodoUseCase, getTodosUseCase }: Depend
     },
     [addTodoUseCase, refresh]
   );
+
+  useEffect(() => {
+    if (autoRefresh) {
+      refresh();
+    }
+  }, [autoRefresh, refresh]);
 
   return {
     addTodo,
