@@ -1,8 +1,4 @@
-type TodoListHeaderProps = {
-  readonly count: number;
-};
-
-export function TodoListHeader({ count }: TodoListHeaderProps) {
+export function TodoListHeader({ count }: { readonly count: number }) {
   return (
     <header className='flex items-end justify-between'>
       <div>
