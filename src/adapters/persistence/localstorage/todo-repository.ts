@@ -7,10 +7,11 @@ export const makeLocalStorageTodoRepository = (): TodoRepository => {
   const add = async (title: string): Promise<Todo> => {
     const todos = await get();
 
-    const id = `${Date.now()}`;
     const done = false;
+    const id = `${Date.now()}`;
+    const now = new Date().toUTCString();
 
-    const newTodo: Todo = { done, title, id };
+    const newTodo: Todo = { done, title, id, added_at: now };
 
     localStorage.setItem(COLLECTION_NAME, JSON.stringify([...todos, newTodo]));
 

@@ -8,5 +8,3 @@ type Dependencies = {
 export const makeToggleTodoUseCase = ({ todoRepository }: Dependencies): UseCaseWithParams<void, { id: string }> => ({
   execute: ({ id }) => todoRepository.toggle(id),
 });
-
-

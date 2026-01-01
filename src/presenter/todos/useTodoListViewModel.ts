@@ -89,12 +89,12 @@ export function useTodoListViewModel({
   }, [autoRefresh, refresh]);
 
   return {
-    addTodo,
     error,
     loading,
+    todos: sortedTodos,
+    addTodo,
     refresh,
     removeTodo,
     toggleTodo,
-    todos: sortedTodos,
   };
 }

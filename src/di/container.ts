@@ -12,8 +12,8 @@ export const buildContainer = () => {
     addTodoUseCase: asFunction(makeAddTodoUseCase, { lifetime: Lifetime.SCOPED }),
     getTodosUseCase: asFunction(makeGetTodosUseCase, { lifetime: Lifetime.SCOPED }),
     removeTodoUseCase: asFunction(makeRemoveTodoUseCase, { lifetime: Lifetime.SCOPED }),
-    toggleTodoUseCase: asFunction(makeToggleTodoUseCase, { lifetime: Lifetime.SCOPED }),
     todoRepository: asFunction(makeLocalStorageTodoRepository, { lifetime: Lifetime.SCOPED }),
+    toggleTodoUseCase: asFunction(makeToggleTodoUseCase, { lifetime: Lifetime.SCOPED }),
   });
   return container;
 };

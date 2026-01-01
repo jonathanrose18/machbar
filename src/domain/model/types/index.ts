@@ -1,5 +1,7 @@
 export type Id = string;
 
+export type IsoDate = string;
+
 export type UseCase<Result> = {
   readonly execute: () => Promise<Result>;
 };

@@ -1,7 +1,10 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
+import { enUS } from 'date-fns/locale';
+import { format } from 'date-fns';
 
-import { Button } from '@/presenter/components/ui/button';
+import { Badge } from '@/presenter/components/ui/badge';
 import { Checkbox } from '@/presenter/components/ui/checkbox';
+import { HoverCard } from '@/presenter/components/ui/hover-card';
 import { cn } from '@/presenter/lib/utils';
 import type { Todo } from '@/domain/model/todo';
 
@@ -13,40 +16,30 @@ type TodoListItemProps = {
 
 export function TodoListItem({ todo, onRemove, onToggle }: TodoListItemProps) {
   const checkboxId = `todo-checkbox-${todo.id}`;
-
-  const handleRemove = useCallback(() => {
-    if (!onRemove) {
-      return;
-    }
-
-    onRemove(todo.id);
-  }, [onRemove, todo.id]);
+  const formattedDate = useMemo(() => format(new Date(todo.added_at), 'PPP', { locale: enUS }), [todo.added_at]);
 
   const handleToggle = useCallback(() => {
-    if (!onToggle) {
-      return;
-    }
-
     onToggle(todo.id);
   }, [onToggle, todo.id]);
 
   return (
-    <li className='hover:bg-accent/50 flex items-center justify-between px-3 py-2 text-sm transition-colors'>
-      <div className='flex items-center gap-2 truncate'>
-        <Checkbox id={checkboxId} checked={todo.done} onCheckedChange={handleToggle} />
-        <label htmlFor={checkboxId} className={cn('truncate', todo.done && 'line-through text-muted-foreground')}>
-          {todo.title}
-        </label>
-      </div>
-      <Button
-        type='button'
-        variant='ghost'
-        size='sm'
-        aria-label={`Aufgabe entfernen: ${todo.title}`}
-        onClick={handleRemove}
-      >
-        Remove
-      </Button>
+    <li>
+      <HoverCard className='flex items-center justify-between gap-2' hoverable={false}>
+        <div className='flex gap-2 items-center'>
+          <Checkbox className='cursor-pointer' id={checkboxId} checked={todo.done} onCheckedChange={handleToggle} />
+          <label
+            className={cn('text-sm cursor-pointer', todo.done && 'line-through text-muted-foreground')}
+            htmlFor={checkboxId}
+          >
+            {todo.title}
+          </label>
+        </div>
+        {todo.added_at && (
+          <Badge className={cn(todo.done && 'line-through')} variant='outline'>
+            {formattedDate}
+          </Badge>
+        )}
+      </HoverCard>
     </li>
   );
 }
