@@ -6,6 +6,6 @@ type Dependencies = {
   readonly todoRepository: TodoRepository;
 };
 
-export const makeAddTodoUseCase = ({ todoRepository }: Dependencies): UseCaseWithParams<Todo, Omit<Todo, 'id'>> => ({
+export const makeAddTodoUseCase = ({ todoRepository }: Dependencies): UseCaseWithParams<Todo, Pick<Todo, 'title'>> => ({
   execute: ({ title }) => todoRepository.add(title),
 });

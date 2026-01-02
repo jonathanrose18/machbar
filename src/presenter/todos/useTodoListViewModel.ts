@@ -47,39 +47,66 @@ export function useTodoListViewModel({
 
   const addTodo = useCallback(
     async (title: string) => {
-      setLoading(true);
       setError(null);
+      // Optimistic update: Create a temporary todo
+      const tempId = `temp-${Date.now()}`;
+      const tempTodo: Todo = {
+        id: tempId,
+        title,
+        done: false,
+        added_at: new Date().toISOString(),
+      };
+      
+      setTodos((prev) => [...prev, tempTodo]);
 
       try {
-        await addTodoUseCase.execute({ title });
-        await refresh();
+        const newTodo = await addTodoUseCase.execute({ title });
+        setTodos((prev) => prev.map((t) => (t.id === tempId ? newTodo : t)));
       } catch (error) {
         setError(error instanceof Error ? error.message : 'Failed to add todo');
-      } finally {
-        setLoading(false);
+        // Rollback
+        setTodos((prev) => prev.filter((t) => t.id !== tempId));
       }
     },
-    [addTodoUseCase, refresh]
+    [addTodoUseCase]
   );
 
   const removeTodo = useCallback(
     async (id: string) => {
-      setLoading(true);
       setError(null);
-      await removeTodoUseCase.execute({ id });
-      await refresh();
+      // Optimistic update
+      const previousTodos = todos;
+      setTodos((prev) => prev.filter((t) => t.id !== id));
+
+      try {
+        await removeTodoUseCase.execute({ id });
+      } catch (error) {
+        setError(error instanceof Error ? error.message : 'Failed to remove todo');
+        // Rollback
+        setTodos(previousTodos);
+      }
     },
-    [removeTodoUseCase, refresh]
+    [removeTodoUseCase, todos]
   );
 
   const toggleTodo = useCallback(
     async (id: string) => {
-      setLoading(true);
       setError(null);
-      await toggleTodoUseCase.execute({ id });
-      await refresh();
+      // Optimistic update
+      const previousTodos = todos;
+      setTodos((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t))
+      );
+
+      try {
+        await toggleTodoUseCase.execute({ id });
+      } catch (error) {
+        setError(error instanceof Error ? error.message : 'Failed to toggle todo');
+        // Rollback
+        setTodos(previousTodos);
+      }
     },
-    [toggleTodoUseCase, refresh]
+    [toggleTodoUseCase, todos]
   );
 
   useEffect(() => {
