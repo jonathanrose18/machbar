@@ -7,5 +7,11 @@ type Dependencies = {
 };
 
 export const makeAddTodoUseCase = ({ todoRepository }: Dependencies): UseCaseWithParams<Todo, Pick<Todo, 'title'>> => ({
-  execute: ({ title }) => todoRepository.add(title),
+  execute: async ({ title }) => {
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) {
+      throw new Error('Title cannot be empty');
+    }
+    return todoRepository.add(trimmedTitle);
+  },
 });

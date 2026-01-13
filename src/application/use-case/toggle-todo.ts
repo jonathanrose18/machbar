@@ -6,5 +6,11 @@ type Dependencies = {
 };
 
 export const makeToggleTodoUseCase = ({ todoRepository }: Dependencies): UseCaseWithParams<void, { id: string }> => ({
-  execute: ({ id }) => todoRepository.toggle(id),
+  execute: async ({ id }) => {
+    const trimmedId = id.trim();
+    if (!trimmedId) {
+      throw new Error('Id cannot be empty');
+    }
+    return todoRepository.toggle(trimmedId);
+  },
 });
