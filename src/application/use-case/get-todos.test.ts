@@ -11,9 +11,14 @@ describe('GetTodosUseCase', () => {
     const getMock = vi.fn().mockResolvedValue(expectedTodos);
     const todoRepository = {
       add: vi.fn(),
+      completeAll: vi.fn(),
       get: getMock,
+      removeCompleted: vi.fn(),
+      removeOpen: vi.fn(),
       remove: vi.fn(),
+      restoreMany: vi.fn(),
       toggle: vi.fn(),
+      update: vi.fn(),
     } as unknown as TodoRepository;
 
     const useCase = makeGetTodosUseCase({ todoRepository });
@@ -27,9 +32,14 @@ describe('GetTodosUseCase', () => {
   it('should propagate repository errors', async () => {
     const todoRepository = {
       add: vi.fn(),
+      completeAll: vi.fn(),
       get: vi.fn().mockRejectedValue(new Error('Repository get failed')),
+      removeCompleted: vi.fn(),
+      removeOpen: vi.fn(),
       remove: vi.fn(),
+      restoreMany: vi.fn(),
       toggle: vi.fn(),
+      update: vi.fn(),
     } as unknown as TodoRepository;
 
     const useCase = makeGetTodosUseCase({ todoRepository });

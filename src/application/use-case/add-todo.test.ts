@@ -7,9 +7,14 @@ describe('AddTodoUseCase', () => {
     const addMock = vi.fn();
     const todoRepository = {
       add: addMock,
+      completeAll: vi.fn(),
       get: vi.fn(),
+      removeCompleted: vi.fn(),
+      removeOpen: vi.fn(),
       remove: vi.fn(),
+      restoreMany: vi.fn(),
       toggle: vi.fn(),
+      update: vi.fn(),
     } as unknown as TodoRepository;
 
     const useCase = makeAddTodoUseCase({ todoRepository });
@@ -25,9 +30,14 @@ describe('AddTodoUseCase', () => {
     const addMock = vi.fn().mockResolvedValue(expectedTodo);
     const todoRepository = {
       add: addMock,
+      completeAll: vi.fn(),
       get: vi.fn(),
+      removeCompleted: vi.fn(),
+      removeOpen: vi.fn(),
       remove: vi.fn(),
+      restoreMany: vi.fn(),
       toggle: vi.fn(),
+      update: vi.fn(),
     } as unknown as TodoRepository;
 
     const useCase = makeAddTodoUseCase({ todoRepository });
@@ -39,9 +49,14 @@ describe('AddTodoUseCase', () => {
   it('should throw error if title is empty', async () => {
     const todoRepository = {
       add: vi.fn(),
+      completeAll: vi.fn(),
       get: vi.fn(),
+      removeCompleted: vi.fn(),
+      removeOpen: vi.fn(),
       remove: vi.fn(),
+      restoreMany: vi.fn(),
       toggle: vi.fn(),
+      update: vi.fn(),
     } as unknown as TodoRepository;
 
     const useCase = makeAddTodoUseCase({ todoRepository });
@@ -54,9 +69,14 @@ describe('AddTodoUseCase', () => {
     const addMock = vi.fn();
     const todoRepository = {
       add: addMock,
+      completeAll: vi.fn(),
       get: vi.fn(),
+      removeCompleted: vi.fn(),
+      removeOpen: vi.fn(),
       remove: vi.fn(),
+      restoreMany: vi.fn(),
       toggle: vi.fn(),
+      update: vi.fn(),
     } as unknown as TodoRepository;
 
     const useCase = makeAddTodoUseCase({ todoRepository });
@@ -70,15 +90,18 @@ describe('AddTodoUseCase', () => {
   it('should propagate repository errors', async () => {
     const todoRepository = {
       add: vi.fn().mockRejectedValue(new Error('Repository add failed')),
+      completeAll: vi.fn(),
       get: vi.fn(),
+      removeCompleted: vi.fn(),
+      removeOpen: vi.fn(),
       remove: vi.fn(),
+      restoreMany: vi.fn(),
       toggle: vi.fn(),
+      update: vi.fn(),
     } as unknown as TodoRepository;
 
     const useCase = makeAddTodoUseCase({ todoRepository });
 
-    await expect(useCase.execute({ title: 'Test' })).rejects.toThrow(
-      'Repository add failed'
-    );
+    await expect(useCase.execute({ title: 'Test' })).rejects.toThrow('Repository add failed');
   });
 });

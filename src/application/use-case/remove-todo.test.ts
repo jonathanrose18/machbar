@@ -7,9 +7,14 @@ describe('RemoveTodoUseCase', () => {
     const removeMock = vi.fn();
     const todoRepository = {
       add: vi.fn(),
+      completeAll: vi.fn(),
       get: vi.fn(),
+      removeCompleted: vi.fn(),
+      removeOpen: vi.fn(),
       remove: removeMock,
+      restoreMany: vi.fn(),
       toggle: vi.fn(),
+      update: vi.fn(),
     } as unknown as TodoRepository;
 
     const useCase = makeRemoveTodoUseCase({ todoRepository });
@@ -23,9 +28,14 @@ describe('RemoveTodoUseCase', () => {
   it('should throw error if id is empty', async () => {
     const todoRepository = {
       add: vi.fn(),
+      completeAll: vi.fn(),
       get: vi.fn(),
+      removeCompleted: vi.fn(),
+      removeOpen: vi.fn(),
       remove: vi.fn(),
+      restoreMany: vi.fn(),
       toggle: vi.fn(),
+      update: vi.fn(),
     } as unknown as TodoRepository;
 
     const useCase = makeRemoveTodoUseCase({ todoRepository });
@@ -37,15 +47,18 @@ describe('RemoveTodoUseCase', () => {
   it('should propagate repository errors', async () => {
     const todoRepository = {
       add: vi.fn(),
+      completeAll: vi.fn(),
       get: vi.fn(),
+      removeCompleted: vi.fn(),
+      removeOpen: vi.fn(),
       remove: vi.fn().mockRejectedValue(new Error('Repository remove failed')),
+      restoreMany: vi.fn(),
       toggle: vi.fn(),
+      update: vi.fn(),
     } as unknown as TodoRepository;
 
     const useCase = makeRemoveTodoUseCase({ todoRepository });
 
-    await expect(useCase.execute({ id: '123' })).rejects.toThrow(
-      'Repository remove failed'
-    );
+    await expect(useCase.execute({ id: '123' })).rejects.toThrow('Repository remove failed');
   });
 });

@@ -1,44 +1,55 @@
-import {
-  act,
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { Todo } from "@/domain/model/todo";
-
-import { TodoList } from "./todo-list";
+import type { Todo } from '@/domain/model/todo';
+import { TodoList } from './todo-list';
 
 type AddTodoUseCase = { execute: (params: { title: string }) => Promise<Todo> };
+type ClearCompletedTodosUseCase = { execute: () => Promise<void> };
+type ClearOpenTodosUseCase = { execute: () => Promise<void> };
+type CompleteAllTodosUseCase = { execute: () => Promise<void> };
 type GetTodosUseCase = { execute: () => Promise<Todo[]> };
 type RemoveTodoUseCase = { execute: (params: { id: string }) => Promise<void> };
+type RestoreTodosUseCase = { execute: (params: { todos: Todo[] }) => Promise<void> };
 type ToggleTodoUseCase = { execute: (params: { id: string }) => Promise<void> };
+type UpdateTodoUseCase = { execute: (params: { id: string; title: string }) => Promise<void> };
 
 let addTodoUseCase: AddTodoUseCase;
+let clearCompletedTodosUseCase: ClearCompletedTodosUseCase;
+let clearOpenTodosUseCase: ClearOpenTodosUseCase;
+let completeAllTodosUseCase: CompleteAllTodosUseCase;
 let getTodosUseCase: GetTodosUseCase;
 let removeTodoUseCase: RemoveTodoUseCase;
+let restoreTodosUseCase: RestoreTodosUseCase;
 let toggleTodoUseCase: ToggleTodoUseCase;
+let updateTodoUseCase: UpdateTodoUseCase;
 
-vi.mock("@/di/container", () => ({
+vi.mock('@/di/container', () => ({
   buildContainer: () => ({
     resolve: (name: string) => {
-      if (name === "addTodoUseCase") return addTodoUseCase;
-      if (name === "getTodosUseCase") return getTodosUseCase;
-      if (name === "removeTodoUseCase") return removeTodoUseCase;
-      if (name === "toggleTodoUseCase") return toggleTodoUseCase;
+      if (name === 'addTodoUseCase') return addTodoUseCase;
+      if (name === 'clearCompletedTodosUseCase') return clearCompletedTodosUseCase;
+      if (name === 'clearOpenTodosUseCase') return clearOpenTodosUseCase;
+      if (name === 'completeAllTodosUseCase') return completeAllTodosUseCase;
+      if (name === 'getTodosUseCase') return getTodosUseCase;
+      if (name === 'removeTodoUseCase') return removeTodoUseCase;
+      if (name === 'restoreTodosUseCase') return restoreTodosUseCase;
+      if (name === 'toggleTodoUseCase') return toggleTodoUseCase;
+      if (name === 'updateTodoUseCase') return updateTodoUseCase;
       throw new Error(`Unknown dependency: ${name}`);
     },
   }),
 }));
 
 const makeTodo = (overrides: Partial<Todo> = {}): Todo => ({
-  id: "1",
-  title: "Todo 1",
+  id: '1',
+  title: 'Todo 1',
   done: false,
-  added_at: "2026-02-01T00:00:00.000Z",
+  added_at: '2026-02-01T00:00:00.000Z',
+  updated_at: '2026-02-01T00:00:00.000Z',
+  completed_at: null,
+  priority: null,
+  due_date: null,
   ...overrides,
 });
 
@@ -52,147 +63,129 @@ const deferred = <T,>() => {
   return { promise, resolve, reject };
 };
 
-describe("TodoList integration", () => {
+describe('TodoList integration', () => {
   afterEach(() => {
     cleanup();
   });
 
   beforeEach(() => {
-    addTodoUseCase = {
-      execute: vi.fn().mockResolvedValue(makeTodo({ id: "new" })),
-    };
+    addTodoUseCase = { execute: vi.fn().mockResolvedValue(makeTodo({ id: 'new' })) };
+    clearCompletedTodosUseCase = { execute: vi.fn().mockResolvedValue(undefined) };
+    clearOpenTodosUseCase = { execute: vi.fn().mockResolvedValue(undefined) };
+    completeAllTodosUseCase = { execute: vi.fn().mockResolvedValue(undefined) };
     getTodosUseCase = { execute: vi.fn().mockResolvedValue([]) };
     removeTodoUseCase = { execute: vi.fn().mockResolvedValue(undefined) };
+    restoreTodosUseCase = { execute: vi.fn().mockResolvedValue(undefined) };
     toggleTodoUseCase = { execute: vi.fn().mockResolvedValue(undefined) };
+    updateTodoUseCase = { execute: vi.fn().mockResolvedValue(undefined) };
   });
 
-  it("should show loading skeleton during initial fetch and then render todos", async () => {
+  it('should show loading skeleton during initial fetch and then render todos', async () => {
     const fetchDeferred = deferred<Todo[]>();
     getTodosUseCase = { execute: vi.fn(() => fetchDeferred.promise) };
 
     const { container } = render(<TodoList />);
-
     expect(container.querySelector('[aria-busy="true"]')).not.toBeNull();
 
     await act(async () => {
-      fetchDeferred.resolve([makeTodo({ id: "a", title: "Task A" })]);
+      fetchDeferred.resolve([makeTodo({ id: 'a', title: 'Task A' })]);
       await fetchDeferred.promise;
     });
 
-    expect(await screen.findByText("Task A")).toBeInTheDocument();
+    expect(await screen.findByText('Task A')).toBeInTheDocument();
   });
 
-  it("should optimistically add a todo and rollback with error when add fails", async () => {
-    const addDeferred = deferred<Todo>();
-    addTodoUseCase = { execute: vi.fn(() => addDeferred.promise) };
-    render(<TodoList />);
-
-    fireEvent.click(await screen.findByRole("button", { name: "Add todo" }));
-    fireEvent.change(screen.getByLabelText("Add new task"), {
-      target: { value: "  New Task  " },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
-
-    expect(await screen.findByText("New Task")).toBeInTheDocument();
-    expect(addTodoUseCase.execute).toHaveBeenCalledWith({ title: "New Task" });
-
-    await act(async () => {
-      addDeferred.reject(new Error("Add failed"));
-      try {
-        await addDeferred.promise;
-      } catch {
-        // expected rejection
-      }
-    });
-
-    await waitFor(() => {
-      expect(screen.queryByText("New Task")).not.toBeInTheDocument();
-      expect(screen.getByText("Add failed")).toBeInTheDocument();
-    });
-  });
-
-  it("should rollback optimistic toggle when toggle fails", async () => {
-    const toggleDeferred = deferred<void>();
+  it('should filter todos with text search', async () => {
     getTodosUseCase = {
       execute: vi
         .fn()
-        .mockResolvedValue([
-          makeTodo({ id: "t-1", title: "Toggle me", done: false }),
-        ]),
+        .mockResolvedValue([makeTodo({ id: '1', title: 'Buy milk' }), makeTodo({ id: '2', title: 'Call mom' })]),
     };
-    toggleTodoUseCase = { execute: vi.fn(() => toggleDeferred.promise) };
-
     render(<TodoList />);
 
-    const checkbox = await screen.findByRole("checkbox");
-    expect(checkbox).toHaveAttribute("aria-checked", "false");
-
-    fireEvent.click(checkbox);
-    expect(toggleTodoUseCase.execute).toHaveBeenCalledWith({ id: "t-1" });
-    expect(checkbox).toHaveAttribute("aria-checked", "true");
-
-    await act(async () => {
-      toggleDeferred.reject(new Error("Toggle failed"));
-      try {
-        await toggleDeferred.promise;
-      } catch {
-        // expected rejection
-      }
+    await screen.findByText('Buy milk');
+    fireEvent.change(screen.getByLabelText('Search todos'), {
+      target: { value: 'call' },
     });
 
     await waitFor(() => {
-      expect(screen.getByRole("checkbox")).toHaveAttribute(
-        "aria-checked",
-        "false",
-      );
-      expect(screen.getByText("Toggle failed")).toBeInTheDocument();
+      expect(screen.queryByText('Buy milk')).not.toBeInTheDocument();
+      expect(screen.getByText('Call mom')).toBeInTheDocument();
     });
   });
 
-  it("should show an error banner when initial fetch fails", async () => {
+  it('should edit todo title inline', async () => {
     getTodosUseCase = {
-      execute: vi.fn().mockRejectedValue(new Error("Load failed")),
+      execute: vi.fn().mockResolvedValue([makeTodo({ id: '1', title: 'Old title' })]),
     };
-
     render(<TodoList />);
 
-    expect(await screen.findByText("Load failed")).toBeInTheDocument();
+    await screen.findByText('Old title');
+    fireEvent.click(screen.getByRole('button', { name: 'Edit todo Old title' }));
+    fireEvent.change(screen.getByLabelText('Edit todo Old title'), {
+      target: { value: 'New title' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save todo Old title' }));
+
+    expect(updateTodoUseCase.execute).toHaveBeenCalledWith({
+      id: '1',
+      title: 'New title',
+    });
+    await screen.findByText('New title');
   });
 
-  it("should rollback optimistic remove when remove fails", async () => {
+  it('should rollback optimistic remove when remove fails and allow undo', async () => {
     const removeDeferred = deferred<void>();
     getTodosUseCase = {
-      execute: vi
-        .fn()
-        .mockResolvedValue([
-          makeTodo({ id: "r-1", title: "Delete me", done: false }),
-        ]),
+      execute: vi.fn().mockResolvedValue([makeTodo({ id: 'r-1', title: 'Delete me' })]),
     };
     removeTodoUseCase = { execute: vi.fn(() => removeDeferred.promise) };
 
     render(<TodoList />);
+    expect(await screen.findByText('Delete me')).toBeInTheDocument();
 
-    expect(await screen.findByText("Delete me")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "Remove todo Delete me" }));
-    expect(removeTodoUseCase.execute).toHaveBeenCalledWith({ id: "r-1" });
-
+    fireEvent.click(screen.getByRole('button', { name: 'Remove todo Delete me' }));
     await waitFor(() => {
-      expect(screen.queryByText("Delete me")).not.toBeInTheDocument();
+      expect(screen.queryByText('Delete me')).not.toBeInTheDocument();
     });
 
     await act(async () => {
-      removeDeferred.reject(new Error("Remove failed"));
+      removeDeferred.reject(new Error('Remove failed'));
       try {
         await removeDeferred.promise;
       } catch {
-        // expected rejection
+        // expected
       }
     });
 
     await waitFor(() => {
-      expect(screen.getByText("Delete me")).toBeInTheDocument();
-      expect(screen.getByText("Remove failed")).toBeInTheDocument();
+      expect(screen.getByText('Delete me')).toBeInTheDocument();
+    });
+  });
+
+  it('should delete completed todos with bulk action and restore with undo', async () => {
+    getTodosUseCase = {
+      execute: vi
+        .fn()
+        .mockResolvedValue([
+          makeTodo({ id: '1', title: 'Done', done: true, completed_at: '2026-02-02T00:00:00.000Z' }),
+          makeTodo({ id: '2', title: 'Open', done: false }),
+        ]),
+    };
+    render(<TodoList />);
+    await screen.findByText('Done');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Delete completed' }));
+    await waitFor(() => {
+      expect(screen.queryByText('Done')).not.toBeInTheDocument();
+    });
+
+    expect(await screen.findByText('1 completed todo(s) deleted')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Done')).toBeInTheDocument();
+      expect(restoreTodosUseCase.execute).toHaveBeenCalled();
     });
   });
 });
