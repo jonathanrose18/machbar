@@ -34,6 +34,17 @@ describe('LocalStorageTodoRepository', () => {
         expect(todos).toEqual(existingTodos);
     });
 
+    it('should return empty array when localStorage contains invalid JSON', async () => {
+        const repo = makeLocalStorageTodoRepository();
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        localStorage.setItem('todos', '{invalid-json');
+
+        const todos = await repo.get();
+
+        expect(todos).toEqual([]);
+        expect(warnSpy).toHaveBeenCalled();
+    });
+
     it('should remove a todo', async () => {
         const repo = makeLocalStorageTodoRepository();
         const existingTodos = [
@@ -64,5 +75,44 @@ describe('LocalStorageTodoRepository', () => {
         await repo.toggle('1');
         const stored2 = JSON.parse(localStorage.getItem('todos') || '[]');
         expect(stored2[0].done).toBe(false);
+    });
+
+    it('should throw when add cannot save to localStorage', async () => {
+        const repo = makeLocalStorageTodoRepository();
+        vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+            throw new Error('Quota exceeded');
+        });
+        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        await expect(repo.add('Test')).rejects.toThrow('Could not save todo.');
+        expect(errorSpy).toHaveBeenCalled();
+    });
+
+    it('should throw when remove cannot save to localStorage', async () => {
+        const repo = makeLocalStorageTodoRepository();
+        vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+            throw new Error('Quota exceeded');
+        });
+        vi.spyOn(Storage.prototype, 'getItem').mockReturnValue(
+            JSON.stringify([{ id: '1', title: 'Test', done: false, added_at: 'now' }])
+        );
+        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        await expect(repo.remove('1')).rejects.toThrow('Could not save todo.');
+        expect(errorSpy).toHaveBeenCalled();
+    });
+
+    it('should throw when toggle cannot save to localStorage', async () => {
+        const repo = makeLocalStorageTodoRepository();
+        vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+            throw new Error('Quota exceeded');
+        });
+        vi.spyOn(Storage.prototype, 'getItem').mockReturnValue(
+            JSON.stringify([{ id: '1', title: 'Test', done: false, added_at: 'now' }])
+        );
+        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+        await expect(repo.toggle('1')).rejects.toThrow('Could not save todo.');
+        expect(errorSpy).toHaveBeenCalled();
     });
 });

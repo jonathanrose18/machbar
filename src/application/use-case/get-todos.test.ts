@@ -23,4 +23,17 @@ describe('GetTodosUseCase', () => {
     expect(getMock).toHaveBeenCalled();
     expect(todos).toEqual(expectedTodos);
   });
+
+  it('should propagate repository errors', async () => {
+    const todoRepository = {
+      add: vi.fn(),
+      get: vi.fn().mockRejectedValue(new Error('Repository get failed')),
+      remove: vi.fn(),
+      toggle: vi.fn(),
+    } as unknown as TodoRepository;
+
+    const useCase = makeGetTodosUseCase({ todoRepository });
+
+    await expect(useCase.execute()).rejects.toThrow('Repository get failed');
+  });
 });

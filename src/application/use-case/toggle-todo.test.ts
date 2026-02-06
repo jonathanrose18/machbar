@@ -33,4 +33,19 @@ describe('ToggleTodoUseCase', () => {
     await expect(useCase.execute({ id: '' })).rejects.toThrow('Id cannot be empty');
     await expect(useCase.execute({ id: '   ' })).rejects.toThrow('Id cannot be empty');
   });
+
+  it('should propagate repository errors', async () => {
+    const todoRepository = {
+      add: vi.fn(),
+      get: vi.fn(),
+      remove: vi.fn(),
+      toggle: vi.fn().mockRejectedValue(new Error('Repository toggle failed')),
+    } as unknown as TodoRepository;
+
+    const useCase = makeToggleTodoUseCase({ todoRepository });
+
+    await expect(useCase.execute({ id: '123' })).rejects.toThrow(
+      'Repository toggle failed'
+    );
+  });
 });

@@ -66,4 +66,19 @@ describe('AddTodoUseCase', () => {
 
     expect(addMock).toHaveBeenCalledWith('Test Todo');
   });
+
+  it('should propagate repository errors', async () => {
+    const todoRepository = {
+      add: vi.fn().mockRejectedValue(new Error('Repository add failed')),
+      get: vi.fn(),
+      remove: vi.fn(),
+      toggle: vi.fn(),
+    } as unknown as TodoRepository;
+
+    const useCase = makeAddTodoUseCase({ todoRepository });
+
+    await expect(useCase.execute({ title: 'Test' })).rejects.toThrow(
+      'Repository add failed'
+    );
+  });
 });

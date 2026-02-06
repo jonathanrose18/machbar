@@ -33,4 +33,19 @@ describe('RemoveTodoUseCase', () => {
     await expect(useCase.execute({ id: '' })).rejects.toThrow('Id cannot be empty');
     await expect(useCase.execute({ id: '   ' })).rejects.toThrow('Id cannot be empty');
   });
+
+  it('should propagate repository errors', async () => {
+    const todoRepository = {
+      add: vi.fn(),
+      get: vi.fn(),
+      remove: vi.fn().mockRejectedValue(new Error('Repository remove failed')),
+      toggle: vi.fn(),
+    } as unknown as TodoRepository;
+
+    const useCase = makeRemoveTodoUseCase({ todoRepository });
+
+    await expect(useCase.execute({ id: '123' })).rejects.toThrow(
+      'Repository remove failed'
+    );
+  });
 });
