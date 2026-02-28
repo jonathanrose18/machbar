@@ -1,4 +1,4 @@
-import { createContainer, asFunction, Lifetime, type AwilixContainer } from 'awilix';
+import { createContainer, asFunction, Lifetime, type AwilixContainer, type Resolver } from 'awilix';
 
 import { makeAddTodoUseCase } from '@/application/use-case/add-todo';
 import { makeGetTodosUseCase } from '@/application/use-case/get-todos';
@@ -16,9 +16,13 @@ type ContainerRegistrations = TodoListUseCases & {
   readonly todoRepository: ReturnType<typeof makeLocalStorageTodoRepository>;
 };
 
+type StrictRegistrationPair<T extends object> = {
+  [K in keyof T]-?: Resolver<T[K]>;
+};
+
 export const buildContainer = (): AwilixContainer<ContainerRegistrations> => {
   const container = createContainer<ContainerRegistrations>({ injectionMode: 'PROXY' });
-  container.register({
+  const registrations: StrictRegistrationPair<ContainerRegistrations> = {
     addTodoUseCase: asFunction(makeAddTodoUseCase, { lifetime: Lifetime.SCOPED }),
     clearCompletedTodosUseCase: asFunction(makeClearCompletedTodosUseCase, { lifetime: Lifetime.SCOPED }),
     clearOpenTodosUseCase: asFunction(makeClearOpenTodosUseCase, { lifetime: Lifetime.SCOPED }),
@@ -29,7 +33,8 @@ export const buildContainer = (): AwilixContainer<ContainerRegistrations> => {
     todoRepository: asFunction(makeLocalStorageTodoRepository, { lifetime: Lifetime.SCOPED }),
     toggleTodoUseCase: asFunction(makeToggleTodoUseCase, { lifetime: Lifetime.SCOPED }),
     updateTodoUseCase: asFunction(makeUpdateTodoUseCase, { lifetime: Lifetime.SCOPED }),
-  });
+  };
+  container.register(registrations);
   return container;
 };
 
