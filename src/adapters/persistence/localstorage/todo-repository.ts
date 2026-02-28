@@ -1,23 +1,11 @@
 import { nowIso } from '@/domain/model/time';
 import type { Todo } from '@/domain/model/todo';
+import { createTodo, createTodoFromPartial } from '@/domain/model/todo-factory';
 import type { TodoRepository } from '@/application/ports/todo-repository';
 
 const COLLECTION_NAME = 'todos';
 
-const normalizeTodo = (value: Partial<Todo>): Todo => {
-  const timestamp = value.added_at ?? nowIso();
-  const done = value.done ?? false;
-  return {
-    id: value.id ?? `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    title: value.title ?? '',
-    done,
-    added_at: timestamp,
-    updated_at: value.updated_at ?? timestamp,
-    completed_at: value.completed_at ?? (done ? (value.updated_at ?? timestamp) : null),
-    priority: value.priority ?? null,
-    due_date: value.due_date ?? null,
-  };
-};
+const normalizeTodo = (value: Partial<Todo>): Todo => createTodoFromPartial(value);
 
 export const makeLocalStorageTodoRepository = (): TodoRepository => {
   const safeGet = (): Todo[] => {
@@ -43,17 +31,7 @@ export const makeLocalStorageTodoRepository = (): TodoRepository => {
 
   const add = async (title: string): Promise<Todo> => {
     const todos = safeGet();
-    const timestamp = nowIso();
-    const newTodo: Todo = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      title,
-      done: false,
-      added_at: timestamp,
-      updated_at: timestamp,
-      completed_at: null,
-      priority: null,
-      due_date: null,
-    };
+    const newTodo = createTodo({ title });
     safeSet([...todos, newTodo]);
     return newTodo;
   };
