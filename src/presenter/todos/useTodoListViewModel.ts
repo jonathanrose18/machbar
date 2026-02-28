@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { Todo } from '@/domain/model/todo';
-import type { UseCase, UseCaseWithParams } from '@/domain/model/types';
+import type { UseCase, UseCaseWithParams } from '@/application/types/use-case';
 
 export type TodoFilter = 'all' | 'open' | 'done';
 export type TodoSortOrder = 'newest' | 'oldest';

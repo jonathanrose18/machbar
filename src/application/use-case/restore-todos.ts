@@ -1,6 +1,6 @@
 import type { TodoRepository } from '@/application/ports/todo-repository';
 import type { Todo } from '@/domain/model/todo';
-import type { UseCaseWithParams } from '@/domain/model/types';
+import type { UseCaseWithParams } from '@/application/types/use-case';
 
 type Dependencies = {
   readonly todoRepository: TodoRepository;
