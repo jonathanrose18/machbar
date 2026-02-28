@@ -10,18 +10,7 @@ import { makeCompleteAllTodosUseCase } from '@/application/use-case/complete-all
 import { makeClearCompletedTodosUseCase } from '@/application/use-case/clear-completed-todos';
 import { makeClearOpenTodosUseCase } from '@/application/use-case/clear-open-todos';
 import { makeRestoreTodosUseCase } from '@/application/use-case/restore-todos';
-
-export type TodoListUseCases = {
-  readonly addTodoUseCase: ReturnType<typeof makeAddTodoUseCase>;
-  readonly clearCompletedTodosUseCase: ReturnType<typeof makeClearCompletedTodosUseCase>;
-  readonly clearOpenTodosUseCase: ReturnType<typeof makeClearOpenTodosUseCase>;
-  readonly completeAllTodosUseCase: ReturnType<typeof makeCompleteAllTodosUseCase>;
-  readonly getTodosUseCase: ReturnType<typeof makeGetTodosUseCase>;
-  readonly removeTodoUseCase: ReturnType<typeof makeRemoveTodoUseCase>;
-  readonly restoreTodosUseCase: ReturnType<typeof makeRestoreTodosUseCase>;
-  readonly toggleTodoUseCase: ReturnType<typeof makeToggleTodoUseCase>;
-  readonly updateTodoUseCase: ReturnType<typeof makeUpdateTodoUseCase>;
-};
+import type { TodoListUseCases } from '@/presenter/todos/types';
 
 type ContainerRegistrations = TodoListUseCases & {
   readonly todoRepository: ReturnType<typeof makeLocalStorageTodoRepository>;

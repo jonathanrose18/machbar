@@ -3,23 +3,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { Todo } from '@/domain/model/todo';
-import type { UseCase, UseCaseWithParams } from '@/application/types/use-case';
+import type { TodoListViewModelDependencies } from './types';
 
 export type TodoFilter = 'all' | 'open' | 'done';
 export type TodoSortOrder = 'newest' | 'oldest';
-
-type Dependencies = {
-  readonly autoRefresh?: boolean;
-  readonly addTodoUseCase: UseCaseWithParams<Todo, { title: string }>;
-  readonly clearCompletedTodosUseCase: UseCase<void>;
-  readonly clearOpenTodosUseCase: UseCase<void>;
-  readonly completeAllTodosUseCase: UseCase<void>;
-  readonly getTodosUseCase: UseCase<Todo[]>;
-  readonly removeTodoUseCase: UseCaseWithParams<void, { id: string }>;
-  readonly restoreTodosUseCase: UseCaseWithParams<void, { todos: Todo[] }>;
-  readonly toggleTodoUseCase: UseCaseWithParams<void, { id: string }>;
-  readonly updateTodoUseCase: UseCaseWithParams<void, { id: string; title: string }>;
-};
 
 type UndoState = {
   readonly message: string;
@@ -39,7 +26,7 @@ export function useTodoListViewModel({
   toggleTodoUseCase,
   updateTodoUseCase,
   autoRefresh = true,
-}: Dependencies) {
+}: TodoListViewModelDependencies) {
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<TodoFilter>('all');
   const [loading, setLoading] = useState<boolean>(false);
