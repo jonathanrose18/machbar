@@ -25,19 +25,17 @@ let toggleTodoUseCase: ToggleTodoUseCase;
 let updateTodoUseCase: UpdateTodoUseCase;
 
 vi.mock('@/di/container', () => ({
-  buildContainer: () => ({
-    resolve: (name: string) => {
-      if (name === 'addTodoUseCase') return addTodoUseCase;
-      if (name === 'clearCompletedTodosUseCase') return clearCompletedTodosUseCase;
-      if (name === 'clearOpenTodosUseCase') return clearOpenTodosUseCase;
-      if (name === 'completeAllTodosUseCase') return completeAllTodosUseCase;
-      if (name === 'getTodosUseCase') return getTodosUseCase;
-      if (name === 'removeTodoUseCase') return removeTodoUseCase;
-      if (name === 'restoreTodosUseCase') return restoreTodosUseCase;
-      if (name === 'toggleTodoUseCase') return toggleTodoUseCase;
-      if (name === 'updateTodoUseCase') return updateTodoUseCase;
-      throw new Error(`Unknown dependency: ${name}`);
-    },
+  buildContainer: () => ({}),
+  resolveTodoListUseCases: () => ({
+    addTodoUseCase,
+    clearCompletedTodosUseCase,
+    clearOpenTodosUseCase,
+    completeAllTodosUseCase,
+    getTodosUseCase,
+    removeTodoUseCase,
+    restoreTodosUseCase,
+    toggleTodoUseCase,
+    updateTodoUseCase,
   }),
 }));
 

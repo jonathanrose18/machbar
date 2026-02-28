@@ -3,7 +3,7 @@
 import { PlusIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-import { buildContainer } from '@/di/container';
+import { buildContainer, resolveTodoListUseCases } from '@/di/container';
 import { AddTodoForm } from '@/presenter/components/add-todo-form';
 import { TodoListItem } from '@/presenter/components/todo-list-item';
 import { TodoListSkeleton } from '@/presenter/components/todo-list-skeleton';
@@ -14,17 +14,7 @@ import { useTodoListViewModel } from '@/presenter/todos/useTodoListViewModel';
 
 export function TodoList() {
   const di = useMemo(buildContainer, []);
-  const vm = useTodoListViewModel({
-    addTodoUseCase: di.resolve('addTodoUseCase'),
-    clearCompletedTodosUseCase: di.resolve('clearCompletedTodosUseCase'),
-    clearOpenTodosUseCase: di.resolve('clearOpenTodosUseCase'),
-    completeAllTodosUseCase: di.resolve('completeAllTodosUseCase'),
-    getTodosUseCase: di.resolve('getTodosUseCase'),
-    removeTodoUseCase: di.resolve('removeTodoUseCase'),
-    restoreTodosUseCase: di.resolve('restoreTodosUseCase'),
-    toggleTodoUseCase: di.resolve('toggleTodoUseCase'),
-    updateTodoUseCase: di.resolve('updateTodoUseCase'),
-  });
+  const vm = useTodoListViewModel(resolveTodoListUseCases(di));
 
   const {
     addTodo,

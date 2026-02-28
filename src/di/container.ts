@@ -1,4 +1,4 @@
-import { createContainer, asFunction, Lifetime } from 'awilix';
+import { createContainer, asFunction, Lifetime, type AwilixContainer } from 'awilix';
 
 import { makeAddTodoUseCase } from '@/application/use-case/add-todo';
 import { makeGetTodosUseCase } from '@/application/use-case/get-todos';
@@ -11,8 +11,24 @@ import { makeClearCompletedTodosUseCase } from '@/application/use-case/clear-com
 import { makeClearOpenTodosUseCase } from '@/application/use-case/clear-open-todos';
 import { makeRestoreTodosUseCase } from '@/application/use-case/restore-todos';
 
-export const buildContainer = () => {
-  const container = createContainer({ injectionMode: 'PROXY' });
+export type TodoListUseCases = {
+  readonly addTodoUseCase: ReturnType<typeof makeAddTodoUseCase>;
+  readonly clearCompletedTodosUseCase: ReturnType<typeof makeClearCompletedTodosUseCase>;
+  readonly clearOpenTodosUseCase: ReturnType<typeof makeClearOpenTodosUseCase>;
+  readonly completeAllTodosUseCase: ReturnType<typeof makeCompleteAllTodosUseCase>;
+  readonly getTodosUseCase: ReturnType<typeof makeGetTodosUseCase>;
+  readonly removeTodoUseCase: ReturnType<typeof makeRemoveTodoUseCase>;
+  readonly restoreTodosUseCase: ReturnType<typeof makeRestoreTodosUseCase>;
+  readonly toggleTodoUseCase: ReturnType<typeof makeToggleTodoUseCase>;
+  readonly updateTodoUseCase: ReturnType<typeof makeUpdateTodoUseCase>;
+};
+
+type ContainerRegistrations = TodoListUseCases & {
+  readonly todoRepository: ReturnType<typeof makeLocalStorageTodoRepository>;
+};
+
+export const buildContainer = (): AwilixContainer<ContainerRegistrations> => {
+  const container = createContainer<ContainerRegistrations>({ injectionMode: 'PROXY' });
   container.register({
     addTodoUseCase: asFunction(makeAddTodoUseCase, { lifetime: Lifetime.SCOPED }),
     clearCompletedTodosUseCase: asFunction(makeClearCompletedTodosUseCase, { lifetime: Lifetime.SCOPED }),
@@ -27,3 +43,15 @@ export const buildContainer = () => {
   });
   return container;
 };
+
+export const resolveTodoListUseCases = (container: AwilixContainer<ContainerRegistrations>): TodoListUseCases => ({
+  addTodoUseCase: container.cradle.addTodoUseCase,
+  clearCompletedTodosUseCase: container.cradle.clearCompletedTodosUseCase,
+  clearOpenTodosUseCase: container.cradle.clearOpenTodosUseCase,
+  completeAllTodosUseCase: container.cradle.completeAllTodosUseCase,
+  getTodosUseCase: container.cradle.getTodosUseCase,
+  removeTodoUseCase: container.cradle.removeTodoUseCase,
+  restoreTodosUseCase: container.cradle.restoreTodosUseCase,
+  toggleTodoUseCase: container.cradle.toggleTodoUseCase,
+  updateTodoUseCase: container.cradle.updateTodoUseCase,
+});
