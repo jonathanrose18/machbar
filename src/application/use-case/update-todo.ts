@@ -1,3 +1,4 @@
+import { normalizeTodoTitle } from '@/domain/model/title';
 import type { TodoRepository } from '@/application/ports/todo-repository';
 import type { UseCaseWithParams } from '@/application/types/use-case';
 
@@ -10,13 +11,9 @@ export const makeUpdateTodoUseCase = ({
 }: Dependencies): UseCaseWithParams<void, { id: string; title: string }> => ({
   execute: async ({ id, title }) => {
     const trimmedId = id.trim();
-    const trimmedTitle = title.trim();
     if (!trimmedId) {
       throw new Error('Id cannot be empty');
     }
-    if (!trimmedTitle) {
-      throw new Error('Title cannot be empty');
-    }
-    return todoRepository.update(trimmedId, trimmedTitle);
+    return todoRepository.update(trimmedId, normalizeTodoTitle(title));
   },
 });
