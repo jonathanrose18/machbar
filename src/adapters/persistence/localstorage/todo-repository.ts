@@ -1,9 +1,8 @@
+import { nowIso } from '@/domain/model/time';
 import type { Todo } from '@/domain/model/todo';
 import type { TodoRepository } from '@/application/ports/todo-repository';
 
 const COLLECTION_NAME = 'todos';
-
-const nowIso = (): string => new Date().toISOString();
 
 const normalizeTodo = (value: Partial<Todo>): Todo => {
   const timestamp = value.added_at ?? nowIso();

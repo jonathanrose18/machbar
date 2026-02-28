@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { nowIso } from '@/domain/model/time';
 import type { Todo } from '@/domain/model/todo';
 import type { TodoListViewModelDependencies } from './types';
 
@@ -105,7 +106,7 @@ export function useTodoListViewModel({
   const addTodo = useCallback(
     async (title: string) => {
       setError(null);
-      const timestamp = new Date().toISOString();
+      const timestamp = nowIso();
       const tempId = `temp-${Date.now()}`;
       const tempTodo: Todo = {
         id: tempId,
@@ -134,7 +135,7 @@ export function useTodoListViewModel({
   const updateTodo = useCallback(
     async (id: string, title: string) => {
       setError(null);
-      const timestamp = new Date().toISOString();
+      const timestamp = nowIso();
       const previousTodos = todos;
       setTodos(prev => prev.map(todo => (todo.id === id ? { ...todo, title, updated_at: timestamp } : todo)));
 
@@ -172,7 +173,7 @@ export function useTodoListViewModel({
     async (id: string) => {
       setError(null);
       const previousTodos = todos;
-      const timestamp = new Date().toISOString();
+      const timestamp = nowIso();
       setTodos(prev =>
         prev.map(todo => {
           if (todo.id !== id) return todo;
@@ -199,7 +200,7 @@ export function useTodoListViewModel({
   const completeAllTodos = useCallback(async () => {
     setError(null);
     const previousTodos = todos;
-    const timestamp = new Date().toISOString();
+    const timestamp = nowIso();
     setTodos(prev =>
       prev.map(todo =>
         todo.done
