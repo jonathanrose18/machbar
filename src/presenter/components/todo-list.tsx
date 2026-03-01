@@ -1,7 +1,7 @@
 'use client';
 
 import { PlusIcon } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import { AddTodoForm } from '@/presenter/components/add-todo-form';
 import { Button } from '@/presenter/components/ui/button';
@@ -10,12 +10,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/presenter/components/ui/separator';
 import { TodoListItem } from '@/presenter/components/todo-list-item';
 import { TodoListSkeleton } from '@/presenter/components/todo-list-skeleton';
-import { buildContainer, resolveTodoListUseCases } from '@/di/container';
 import { useTodoListViewModel } from '@/presenter/todos/useTodoListViewModel';
+import type { TodoListUseCases } from '@/presenter/todos/types';
 
-export function TodoList() {
-  const di = useMemo(buildContainer, []);
-  const vm = useTodoListViewModel(resolveTodoListUseCases(di));
+type TodoListProps = {
+  readonly useCases: TodoListUseCases;
+};
+
+export function TodoList({ useCases }: TodoListProps) {
+  const vm = useTodoListViewModel(useCases);
 
   const {
     addTodo,

@@ -1,11 +1,11 @@
 import { Header } from '@/presenter/components/header';
-import { TodoList } from '@/presenter/components/todo-list';
+import { TodoListRoot } from '@/app/todo-list-root';
 
 export default function Home() {
   return (
     <>
       <Header />
-      <TodoList />
+      <TodoListRoot />
     </>
   );
 }

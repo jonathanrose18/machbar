@@ -24,21 +24,6 @@ let restoreTodosUseCase: RestoreTodosUseCase;
 let toggleTodoUseCase: ToggleTodoUseCase;
 let updateTodoUseCase: UpdateTodoUseCase;
 
-vi.mock('@/di/container', () => ({
-  buildContainer: () => ({}),
-  resolveTodoListUseCases: () => ({
-    addTodoUseCase,
-    clearCompletedTodosUseCase,
-    clearOpenTodosUseCase,
-    completeAllTodosUseCase,
-    getTodosUseCase,
-    removeTodoUseCase,
-    restoreTodosUseCase,
-    toggleTodoUseCase,
-    updateTodoUseCase,
-  }),
-}));
-
 const makeTodo = (overrides: Partial<Todo> = {}): Todo => ({
   id: '1',
   title: 'Todo 1',
@@ -61,6 +46,23 @@ const deferred = <T,>() => {
   return { promise, resolve, reject };
 };
 
+const renderTodoList = () =>
+  render(
+    <TodoList
+      useCases={{
+        addTodoUseCase,
+        clearCompletedTodosUseCase,
+        clearOpenTodosUseCase,
+        completeAllTodosUseCase,
+        getTodosUseCase,
+        removeTodoUseCase,
+        restoreTodosUseCase,
+        toggleTodoUseCase,
+        updateTodoUseCase,
+      }}
+    />
+  );
+
 describe('TodoList integration', () => {
   afterEach(() => {
     cleanup();
@@ -82,7 +84,7 @@ describe('TodoList integration', () => {
     const fetchDeferred = deferred<Todo[]>();
     getTodosUseCase = { execute: vi.fn(() => fetchDeferred.promise) };
 
-    const { container } = render(<TodoList />);
+    const { container } = renderTodoList();
     expect(container.querySelector('[aria-busy="true"]')).not.toBeNull();
 
     await act(async () => {
@@ -99,7 +101,7 @@ describe('TodoList integration', () => {
         .fn()
         .mockResolvedValue([makeTodo({ id: '1', title: 'Buy milk' }), makeTodo({ id: '2', title: 'Call mom' })]),
     };
-    render(<TodoList />);
+    renderTodoList();
 
     await screen.findByText('Buy milk');
     fireEvent.change(screen.getByLabelText('Search todos'), {
@@ -116,7 +118,7 @@ describe('TodoList integration', () => {
     getTodosUseCase = {
       execute: vi.fn().mockResolvedValue([makeTodo({ id: '1', title: 'Old title' })]),
     };
-    render(<TodoList />);
+    renderTodoList();
 
     await screen.findByText('Old title');
     fireEvent.click(screen.getByRole('button', { name: 'Edit todo Old title' }));
@@ -139,7 +141,7 @@ describe('TodoList integration', () => {
     };
     removeTodoUseCase = { execute: vi.fn(() => removeDeferred.promise) };
 
-    render(<TodoList />);
+    renderTodoList();
     expect(await screen.findByText('Delete me')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Remove todo Delete me' }));
@@ -170,7 +172,7 @@ describe('TodoList integration', () => {
           makeTodo({ id: '2', title: 'Open', done: false }),
         ]),
     };
-    render(<TodoList />);
+    renderTodoList();
     await screen.findByText('Done');
 
     fireEvent.click(screen.getByRole('button', { name: 'Delete completed' }));
