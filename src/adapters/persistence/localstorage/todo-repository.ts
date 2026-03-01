@@ -1,6 +1,6 @@
+import { createTodo, createTodoFromPartial } from '@/domain/model/todo-factory';
 import { nowIso } from '@/domain/model/time';
 import type { Todo } from '@/domain/model/todo';
-import { createTodo, createTodoFromPartial } from '@/domain/model/todo-factory';
 import type { TodoRepository } from '@/application/ports/todo-repository';
 
 const COLLECTION_NAME = 'todos';

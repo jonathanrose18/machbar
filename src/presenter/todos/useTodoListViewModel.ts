@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { nowIso } from '@/domain/model/time';
 import type { Todo } from '@/domain/model/todo';
+
 import type { TodoListViewModelDependencies } from './types';
 
 export type TodoFilter = 'all' | 'open' | 'done';

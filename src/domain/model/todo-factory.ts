@@ -1,19 +1,18 @@
-import { nowIso } from "./time";
-import type { Todo } from "./todo";
+import { nowIso } from './time';
+import type { Todo } from './todo';
 
 type CreateTodoParams = {
-  readonly addedAt?: Todo["added_at"];
-  readonly completedAt?: Todo["completed_at"];
-  readonly done?: Todo["done"];
-  readonly dueDate?: Todo["due_date"];
-  readonly id?: Todo["id"];
-  readonly priority?: Todo["priority"];
-  readonly title: Todo["title"];
-  readonly updatedAt?: Todo["updated_at"];
+  readonly addedAt?: Todo['added_at'];
+  readonly completedAt?: Todo['completed_at'];
+  readonly done?: Todo['done'];
+  readonly dueDate?: Todo['due_date'];
+  readonly id?: Todo['id'];
+  readonly priority?: Todo['priority'];
+  readonly title: Todo['title'];
+  readonly updatedAt?: Todo['updated_at'];
 };
 
-export const generateTodoId = (): Todo["id"] =>
-  `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+export const generateTodoId = (): Todo['id'] => `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
 export const createTodo = ({
   addedAt,
@@ -47,7 +46,7 @@ export const createTodoFromPartial = (value: Partial<Todo>): Todo => {
 
   return createTodo({
     id: value.id,
-    title: value.title ?? "",
+    title: value.title ?? '',
     done,
     addedAt,
     updatedAt,

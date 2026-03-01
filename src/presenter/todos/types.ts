@@ -1,5 +1,5 @@
-import type { UseCase, UseCaseWithParams } from '@/application/types/use-case';
 import type { Todo } from '@/domain/model/todo';
+import type { UseCase, UseCaseWithParams } from '@/application/types/use-case';
 
 export type TodoListViewModelDependencies = {
   readonly addTodoUseCase: UseCaseWithParams<Todo, { title: string }>;

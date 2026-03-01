@@ -3,13 +3,14 @@
 import { PlusIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
-import { buildContainer, resolveTodoListUseCases } from '@/di/container';
 import { AddTodoForm } from '@/presenter/components/add-todo-form';
-import { TodoListItem } from '@/presenter/components/todo-list-item';
-import { TodoListSkeleton } from '@/presenter/components/todo-list-skeleton';
 import { Button } from '@/presenter/components/ui/button';
 import { Input } from '@/presenter/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/presenter/components/ui/select';
 import { Separator } from '@/presenter/components/ui/separator';
+import { TodoListItem } from '@/presenter/components/todo-list-item';
+import { TodoListSkeleton } from '@/presenter/components/todo-list-skeleton';
+import { buildContainer, resolveTodoListUseCases } from '@/di/container';
 import { useTodoListViewModel } from '@/presenter/todos/useTodoListViewModel';
 
 export function TodoList() {
@@ -70,15 +71,15 @@ export function TodoList() {
           <Button onClick={() => setFilter('done')} size='sm' variant={filter === 'done' ? 'default' : 'outline'}>
             Done ({stats.completed})
           </Button>
-          <select
-            aria-label='Sort todos'
-            className='border-input bg-background h-9 rounded-md border px-3 text-sm'
-            onChange={event => setSortOrder(event.target.value as 'newest' | 'oldest')}
-            value={sortOrder}
-          >
-            <option value='newest'>Newest first</option>
-            <option value='oldest'>Oldest first</option>
-          </select>
+          <Select onValueChange={value => setSortOrder(value as 'newest' | 'oldest')} value={sortOrder}>
+            <SelectTrigger aria-label='Sort todos' className='w-[140px] h-9'>
+              <SelectValue placeholder='Sort order' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='newest'>Newest first</SelectItem>
+              <SelectItem value='oldest'>Oldest first</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div className='flex flex-wrap gap-2'>
           <Button disabled={stats.open === 0} onClick={() => void completeAllTodos()} size='sm' variant='secondary'>
