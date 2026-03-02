@@ -1,4 +1,4 @@
-# Machbar
+# machbar
 
 A todo app built with Next.js + TypeScript, following a pragmatic Clean Architecture approach with optimistic UI updates.
 
